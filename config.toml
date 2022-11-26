@@ -7,3 +7,9 @@ theme = 'holy'
 
 [params]
     copyright = "© 2022 sasakino"
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 10
