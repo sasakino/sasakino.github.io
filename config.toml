@@ -2,11 +2,11 @@ baseURL = 'https://sasakino.github.io/'
 languageCode = 'ja-jp'
 title = 'Subsumption'
 author = "sasakino"
-copyright = "© 2022 sasakino"
+copyright = "© 2023 sasakino"
 theme = 'holy'
 
 [params]
-    copyright = "© 2022 sasakino"
+    copyright = "© 2023 sasakino"
 
   [[menu.main]]
     identifier = "about"
