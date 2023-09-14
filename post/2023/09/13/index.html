@@ -1,0 +1,354 @@
+<!doctype html><html><head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<title>Open Interpreter を使ってみる - Subsumption</title>
+<meta name=description content="Open Interpreter ってなに？ https://openinterpreter.com/
+ローカル環境で使える ChatGPT のようなアプリケーションらしい。
+自然言語による指示でファイル操作やブラウザ制御などができるとのこと。
+Google Colab でのデモも用意されているが、今回はローカル環境で試してみる。
+実行環境は次の通り。
+ MacBook Pro（14インチ、2021） Darwin MacBook-Pro-2.local 21.1.0 Darwin Kernel Version 21.1.0 Python 3.11.3  インストール MacOS 向けのドキュメントが用意されているので、こちらを参考にする。
+https://github.com/KillianLucas/open-interpreter/blob/main/docs/MACOS.md
+conda は利用してないので、そのくだりはスキップ。
+open-interpreter をインストール。
+$ pip install open-interpreter 既存の llama-cpp-python をアンインストール。
+$ pip uninstall llama-cpp-python -y Apple Silicon サポートの llama-cpp-python をインストール。
+$ CMAKE_ARGS=&#34;-DLLAMA_METAL=on&#34; FORCE_CMAKE=1 pip install -U llama-cpp-python --no-cache-dir $ pip install 'llama-cpp-python[server]' 特に問題なく完了。かんたん。
+セットアップ interpreter コマンドで対話的インタフェースを起動できる。
+LLM を選ぶ 最初に、OepnAI API Key を入力して GPT-4 を利用するか、無料版の Code-Llama を利用するかを聞かれる。">
+<meta name=author content>
+<link href=https://unpkg.com/@master/normal.css rel=stylesheet>
+<script src=https://unpkg.com/@master/style@1.5.0></script>
+<script src=https://unpkg.com/@master/styles@1.13.0></script>
+<script src=https://unpkg.com/master-styles-group></script>
+<script src=https://unpkg.com/themes.js></script>
+<script>window.themes=window.themes||new window.Themes</script></head>
+<body class="bg:fade-84@dark font:fade-16@dark">
+<nav class="w:full h:90 fixed bg:fade-84/.95@dark bg:white z:1000">
+<div class="h:full
+w:full
+max-w:1200
+mx:auto
+px:32
+d:flex
+align-items:center">
+<div>
+<a href=/ class="mr-3 font:extralight">Subsumption</a>
+</div>
+<div class=ml:auto>
+<a class="font:semibold
+font:fade
+font:fade-10:hover
+font:fade-30.active
+px:8
+transition:150ms;ease-in" href=/about/ title>About</a>
+</div>
+</div>
+</nav>
+<div class="d:flex flex:column@<=sm pt:90 px:24 jc:center gap:44 word-break:break-word">
+<div class="max-w:700 w:full box:content-box">
+<article class="box:border-box pt:32">
+<header class=mb:32>
+<div class="font:40 font:extrabold">Open Interpreter を使ってみる</div>
+<div class="mt:16 f:fade-60">
+<time>Sep 13, 2023</time>
+</div>
+</header><div class="_:where(a):hover{text-decoration-color:fade}
+_:where(a){text-decoration:2;underline;fade-10;_text-decoration-color:fade-70@dark}
+_:where(blockquote){bl:5;solid;fade-76/.1;_bl:5;solid;fade-34/.1@dark}
+_:where(code){font:90%;_v:middle}
+_:where(code:not(.highlight_*,pre_*)){p:2;6;_r:4}
+_:where(del){text-decoration:1;line-through;fade-68;_text-decoration-color:red-64@dark}
+_:where(figcaption){text:14;_p:10;20;0;_width:fit;_mx:auto;_font:fade-56;_font:fade-57@dark}
+_:where(h1){font:40;_font:extrabold}
+_:where(h1,h2,h3)+:where(h1,h2,h3){mt:.5em}
+_:where(h1,h2,h3,h4,h5,h6){mt:2em}
+_:where(h2){mb:1em;_font:32}
+_:where(h3){font:24}
+_:where(h4){font:20}
+_:where(h5){font:16}
+_:where(h6){font:14}
+_:where(li)::marker{font:fade-44;_font:fade-68@dark}
+_:where(li){pl:.375em}
+_:where(mark){text-decoration:1;underline;#fce016;_bg:transparent;_text-decoration-color:rgb(252;224;22/.5)@dark}
+_:where(p,li){font:fade-76;_font:16;_line-height:1.65;_font:fade-34@dark}
+_:where(p,pre,blockquote,figure,ul,ol,table){my:1.125em}
+>:first-child{mt:0!}
+_:where(pre){p:20;_r:8;_overflow:auto}
+_:where(pre,code:not(.highlight_*)){bg:fade-2;_bg:fade-92!@dark}
+_:where(strong,b,a,code:not(.highlight_*),mark,del){font:fade-92;_font:fade-12@dark}
+_:where(table){width:full;_border-spacing:0}
+_:where(td){v:baseline}
+_:where(td,th):first-child{pl:0}
+_:where(td,th):last-child{pr:0}
+_:where(td,th){bb:1;solid;fade-92/.06;_p:6;_b:fade-4/.04@dark}
+_:where(th){font:fade-78;_font:14;_text:left;_font:fade-12@dark}
+_:where(th,p_code,li_code,a,mark){font:semibold;_font:medium@dark}
+_:where(ul){list-style-type:disc}
+_:where(ul,ol,blockquote){pl:1.5em}
+_:where(video,img){max-width:full}
+_:where(a,mark){text-underline-offset:3}"><h1 id=open-interpreter-ってなに>Open Interpreter ってなに？</h1>
+<p><a href=https://openinterpreter.com/>https://openinterpreter.com/</a></p>
+<p>ローカル環境で使える ChatGPT のようなアプリケーションらしい。<br>
+自然言語による指示でファイル操作やブラウザ制御などができるとのこと。</p>
+<p>Google Colab でのデモも用意されているが、今回はローカル環境で試してみる。</p>
+<p>実行環境は次の通り。</p>
+<ul>
+<li>MacBook Pro（14インチ、2021）</li>
+<li>Darwin MacBook-Pro-2.local 21.1.0 Darwin Kernel Version 21.1.0</li>
+<li>Python 3.11.3</li>
+</ul>
+<h2 id=インストール>インストール</h2>
+<p>MacOS 向けのドキュメントが用意されているので、こちらを参考にする。</p>
+<p><a href=https://github.com/KillianLucas/open-interpreter/blob/main/docs/MACOS.md>https://github.com/KillianLucas/open-interpreter/blob/main/docs/MACOS.md</a></p>
+<p>conda は利用してないので、そのくだりはスキップ。</p>
+<p>open-interpreter をインストール。</p>
+<pre tabindex=0><code>$ pip install open-interpreter
+</code></pre><p>既存の llama-cpp-python をアンインストール。</p>
+<pre tabindex=0><code>$ pip uninstall llama-cpp-python -y
+</code></pre><p>Apple Silicon サポートの llama-cpp-python をインストール。</p>
+<pre tabindex=0><code>$ CMAKE_ARGS=&quot;-DLLAMA_METAL=on&quot; FORCE_CMAKE=1 pip install -U llama-cpp-python --no-cache-dir
+$ pip install 'llama-cpp-python[server]'
+</code></pre><p>特に問題なく完了。かんたん。</p>
+<h2 id=セットアップ>セットアップ</h2>
+<p><code>interpreter</code> コマンドで対話的インタフェースを起動できる。</p>
+<h3 id=llm-を選ぶ>LLM を選ぶ</h3>
+<p>最初に、OepnAI API Key を入力して GPT-4 を利用するか、無料版の Code-Llama を利用するかを聞かれる。</p>
+<pre tabindex=0><code>$ interpreter
+
+Welcome to Open Interpreter.                                                 
+
+─────────────────────────────────────────────────────────────────────────────
+
+▌ OpenAI API key not found                                                 
+
+To use GPT-4 (recommended) please provide an OpenAI API key.                 
+
+To use Code-Llama (free but less capable) press enter.                       
+
+─────────────────────────────────────────────────────────────────────────────
+
+OpenAI API key: 
+</code></pre><p>Code-Llama は Meta 社が公開した研究目的・商業用途で利用可能な LLM らしい。</p>
+<p>今回はローカル環境で試したいので Code-Llama を使ってみる。</p>
+<p>キーを入力せずに Enter で次に進めば OK。</p>
+<pre tabindex=0><code>Open Interpreter will use Code Llama for local execution. Use your arrow keys
+to set up the model.                                                         
+
+</code></pre><h3 id=parameter-count-を選ぶ-code-llama-の場合>Parameter count を選ぶ (Code-Llama の場合)</h3>
+<p>次に Parameter count の選択を求められる。</p>
+<p>数字が小さいほど処理が高速で、大きいほど性能が良いらしい。</p>
+<p>今回は一番小さい 7B を選択。</p>
+<pre tabindex=0><code>[?] Parameter count (smaller is faster, larger is more capable): 13B
+ &gt; 7B
+   13B
+   34B
+</code></pre><h3 id=quality-を選ぶ>Quality を選ぶ</h3>
+<p>今度は Quality の選択を求められる。</p>
+<p>こちらも数字が小さいほど高速で、大きいほど高性能らしい。</p>
+<p>これも一番小さい Small を選択。</p>
+<pre tabindex=0><code>[?] Quality (smaller is faster, larger is more capable): Medium | Size: 7.3 GB, Estimated RAM usage: 9.8 GB
+ &gt; Small | Size: 5.1 GB, Estimated RAM usage: 7.6 GB
+   Medium | Size: 7.3 GB, Estimated RAM usage: 9.8 GB
+   Large | Size: 12.9 GB, Estimated RAM usage: 15.4 GB
+   See More
+</code></pre><h3 id=gpu-を使用する>GPU を使用する？</h3>
+<p>GPU を使用するかどうか聞かれる。</p>
+<p>GPU を使うと、実行が速くなる代わりにクラッシュすることがあるらしい。</p>
+<p>試しに使ってみることにする。Y を選択。</p>
+<pre tabindex=0><code>[?] Use GPU? (Large models might crash on GPU, but will run more quickly) (Y/n): 
+</code></pre><h3 id=モデルのダウンロード>モデルのダウンロード</h3>
+<p>ローカル環境にまだモデルがないのでダウンロードが必要。Y を選択。</p>
+<pre tabindex=0><code>This language model was not found on your system.
+
+Download to `/Users/n_sasaki/Library/Application Support/Open Interpreter/models`? 
+[?]  (Y/n): 
+</code></pre><p>モデルのダウンロードが終わったらようやく準備完了。</p>
+<pre tabindex=0><code>▌ Model set to TheBloke/CodeLlama-7B-Instruct-GGUF                                                      
+
+Open Interpreter will require approval before running code. Use interpreter -y to bypass this.             
+
+Press CTRL-C to exit.                                                                                      
+
+&gt;
+</code></pre><h2 id=実行>実行</h2>
+<h3 id=ブラウザでリンクを開く>ブラウザでリンクを開く</h3>
+<p>試しにブラウザでこのブログを開いてもらうようお願いしてみる。</p>
+<pre tabindex=0><code>&gt; Please open https://sasakino.github.io in Google Chrome.
+</code></pre><pre tabindex=0><code>  Let's start with opening Google Chrome.                                                                  
+                                                                                                           
+
+                                                                                                           
+  open https://sasakino.github.io                                                                          
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+</code></pre><p>open コマンドでリンクを開くプロンプトが生成された。いいね。</p>
+<p>y を押すとそのまま実行できるらしい。実行してみる。</p>
+<pre tabindex=0><code>  open https://sasakino.github.io                                                                          
+                                                                                                           
+
+                                                                                                           
+  it is likely that the website you are trying to open does not exist or is inaccessible from your         
+  current location. Please try again with a different URL or check your internet connection.               
+</code></pre><p>open コマンドが実行され、ブラウザでブログが開けた。</p>
+<p>（なにやらウェブサイトが存在しないとか言われてるけど、ちゃんと開けました）</p>
+<h3 id=ネットワーク速度の測定>ネットワーク速度の測定</h3>
+<p>次はもうちょっと抽象的な依頼を投げてみる。</p>
+<pre tabindex=0><code>&gt; Please measure network speed.
+</code></pre><pre tabindex=0><code>                                                                                                           
+  To measure network speed, we need to use a tool that can give us an accurate measurement of our          
+  internet connection speed. One such tool is the speedtest command in Linux. We can run this command on   
+  our machine and get an estimate of our internet speed.                                                   
+                                                                                                           
+  Here's how you can do it:                                                                                
+                                                                                                           
+
+                                                                                                           
+  $ speedtest                                                                                              
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+</code></pre><p><code>speedtest</code> というコマンドでネットワーク速度を測定できるとのこと。</p>
+<p>僕の環境ではそのコマンド動かないけど大丈夫かな？</p>
+<pre tabindex=0><code>  $ speedtest                                                                                              
+                                                                                                           
+                                                                                                           
+  Traceback (most recent call last):                                                                       
+    File &quot;/usr/local/lib/python3.11/site-packages/interpreter/code_interpreter.py&quot;, line 177, in run       
+      code = self.add_active_line_prints(code)                                                             
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                             
+    File &quot;/usr/local/lib/python3.11/site-packages/interpreter/code_interpreter.py&quot;, line 268, in           
+  add_active_line_prints                                                                                   
+      return add_active_line_prints_to_python(code)                                                        
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                        
+    File &quot;/usr/local/lib/python3.11/site-packages/interpreter/code_interpreter.py&quot;, line 430, in           
+  add_active_line_prints_to_python                                                                         
+      tree = ast.parse(code)                                                                               
+             ^^^^^^^^^^^^^^^                                                                               
+    File                                                                                                   
+  &quot;/usr/local/Cellar/python@3.11/3.11.3/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ast.py&quot;,  
+  line 50, in parse                                                                                        
+      return compile(source, filename, mode, flags,                                                        
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                        
+    File &quot;&lt;unknown&gt;&quot;, line 1                                                                               
+      $ speedtest                                                                                          
+      ^                                                                                                    
+  SyntaxError: invalid syntax                                                                              
+                                                                                                           
+                                                                                                           
+                                                                                                           
+  it looks like there was a syntax error in the command. The $ symbol is not recognized as a valid         
+  command in this context.                                                                                 
+                                                                                                           
+  To fix the issue, we need to remove the $ symbol and run the command again. Here's the corrected         
+  command:                                                                                                 
+                                                                                                           
+
+                                                                                                           
+  speedtest                                                                                                
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+</code></pre><p>$ マークを解釈できなくて実行時エラーを起こしてしまった様子。なるほど確かに。</p>
+<p>しかしこれで終わりではなく、自分で間違いに気づいて $ マークなしのプロンプトを生成してくれた。</p>
+<p>次はどうなる？</p>
+<pre tabindex=0><code>  speedtest                                                                                                
+                                                                                                           
+                                                                                                           
+  File &quot;&lt;stdin&gt;&quot;, line 4, in &lt;module&gt;                                                                      
+  NameError: name 'speedtest' is not defined                                                               
+                                                                                                           
+                                                                                                           
+  it looks like there was a syntax error in the command. The $ symbol is not recognized as a valid         
+  command in this context.                                                                                 
+                                                                                                           
+  To fix the issue, we need to remove the $ symbol and run the command again. Here's the corrected         
+  command:                                                                                                 
+                                                                                                           
+
+                                                                                                           
+  speedtest                                                                                                
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+</code></pre><p>speedtest が未定義のため実行時エラー。まあそうですよね。</p>
+<p>それでも諦めずに次の解決策を考えてくれる。でも一つ前の問題と同じ解決策を導いちゃってる。</p>
+<pre tabindex=0><code>  speedtest                                                                                                
+                                                                                                           
+                                                                                                           
+  File &quot;&lt;stdin&gt;&quot;, line 4, in &lt;module&gt;                                                                      
+  NameError: name 'speedtest' is not defined                                                               
+                                                                                                           
+                                                                                                           
+  it looks like there was a syntax error in the command. The $ symbol is not recognized as a valid         
+  command in this context.                                                                                 
+                                                                                                           
+  To fix the issue, we need to remove the $ symbol and run the command again. Here's the corrected         
+  command:                                                                                                 
+                                                                                                           
+
+                                                                                                           
+  speedtest                                                                                                
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+</code></pre><p>以降は同じプロンプトが生成されるループに陥ってしまった。</p>
+<h2 id=感想>感想</h2>
+<p>プロンプトを提案してくれて、あとは実行するだけって状態にしてくれるのはすごく便利。</p>
+<p>しかも誤りがあった場合、自分で訂正までしてくれる。これはすごい。</p>
+<p>ただ、今回選択したモデルでは肝心の性能があまりよろしくなく、実用的ではなかった。</p>
+<p>Code-Llama をもっと capable な設定にしてみたり、（ローカル実行ではなくなるけど）GPT-4 でも試してみたい。</p>
+<h2 id=おまけ>おまけ</h2>
+<pre tabindex=0><code>&gt; Answer to the Ultimate Question of Life, the Universe, and Everything
+                                                                                                           
+  42 is an answer to the ultimate question of life, the universe, and everything. It was first proposed    
+  by Douglas Adams in his book &quot;The Hitchhiker's Guide to the Galaxy&quot;. The book is a humorous work that    
+  explores the concept of the ultimate question and its answers.                                           
+                                                                                                           
+  Let's see if we can find the answer to the ultimate question of life, the universe, and everything       
+  using code. I'll write some code in a markdown code block.                                               
+                                                                                                           
+
+                                                                                                           
+  # Find the answer to the ultimate question of life, the universe, and everything                         
+  answer = 0                                                                                               
+  while True:                                                                                              
+      answer += 1                                                                                          
+      if answer == 42:                                                                                     
+          print(&quot;The answer is&quot;, answer)                                                                   
+          break                                                                                            
+                                                                                                           
+
+  Would you like to run this code? (y/n)
+
+                                              y                                                              
+                                                                                                           
+  # Find the answer to the ultimate question of life, the universe, and everything                         
+  answer = 0                                                                                               
+  while True:                                                                                              
+      answer += 1                                                                                          
+      if answer == 42:                                                                                     
+          print(&quot;The answer is&quot;, answer)                                                                   
+          break                                                                                            
+                                                                                                           
+                                                                                                           
+  The answer is 42                                                                                         
+                                                                                                           
+                                                                                                           
+  42 is indeed the answer to the ultimate question of life, the universe, and everything. It's a           
+  well-known answer that has been discussed in various works of fiction, including Douglas Adams' &quot;The     
+  Hitchhiker's Guide to the Galaxy&quot;.                                                                       
+                                                                                                           
+  Now that we have found the answer, let's see what else we can do with it. What would you like to do      
+  next?                                                                                                    
+</code></pre><p>謎のコード生成してて笑った。</p>
+</div></article>
+<footer class=py:24>
+<div class="f:fade-30 f:14 mb:8">© 2022 sasakino</div>
+<div class="f:fade-60 f:12">Theme <a class=f:bold href=https://github.com/serkodev/holy _target=_blank>Holy</a></div>
+</footer></div>
+</div>
+</body>
+</html>

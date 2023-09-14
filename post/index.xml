@@ -1,4 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Subsumption</title><link>https://sasakino.github.io/post/</link><description>Recent content in Posts on Subsumption</description><generator>Hugo -- gohugo.io</generator><language>ja-jp</language><copyright>© 2022 sasakino</copyright><lastBuildDate>Fri, 06 Jan 2023 10:19:21 +0900</lastBuildDate><atom:link href="https://sasakino.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>第一四半期の目標</title><link>https://sasakino.github.io/post/2023-01-06/</link><pubDate>Fri, 06 Jan 2023 10:19:21 +0900</pubDate><guid>https://sasakino.github.io/post/2023-01-06/</guid><description>4月までの目標を立てる。主なテーマは減量と英語学習。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Subsumption</title><link>https://sasakino.github.io/post/</link><description>Recent content in Posts on Subsumption</description><generator>Hugo -- gohugo.io</generator><language>ja-jp</language><copyright>© 2022 sasakino</copyright><lastBuildDate>Wed, 13 Sep 2023 23:23:31 +0900</lastBuildDate><atom:link href="https://sasakino.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>Open Interpreter を使ってみる</title><link>https://sasakino.github.io/post/2023/09/13/</link><pubDate>Wed, 13 Sep 2023 23:23:31 +0900</pubDate><guid>https://sasakino.github.io/post/2023/09/13/</guid><description>Open Interpreter ってなに？ https://openinterpreter.com/
+ローカル環境で使える ChatGPT のようなアプリケーションらしい。
+自然言語による指示でファイル操作やブラウザ制御などができるとのこと。
+Google Colab でのデモも用意されているが、今回はローカル環境で試してみる。
+実行環境は次の通り。
+MacBook Pro（14インチ、2021） Darwin MacBook-Pro-2.local 21.1.0 Darwin Kernel Version 21.1.0 Python 3.11.3 インストール MacOS 向けのドキュメントが用意されているので、こちらを参考にする。
+https://github.com/KillianLucas/open-interpreter/blob/main/docs/MACOS.md
+conda は利用してないので、そのくだりはスキップ。
+open-interpreter をインストール。
+$ pip install open-interpreter 既存の llama-cpp-python をアンインストール。
+$ pip uninstall llama-cpp-python -y Apple Silicon サポートの llama-cpp-python をインストール。
+$ CMAKE_ARGS=&amp;quot;-DLLAMA_METAL=on&amp;quot; FORCE_CMAKE=1 pip install -U llama-cpp-python --no-cache-dir $ pip install 'llama-cpp-python[server]' 特に問題なく完了。かんたん。
+セットアップ interpreter コマンドで対話的インタフェースを起動できる。
+LLM を選ぶ 最初に、OepnAI API Key を入力して GPT-4 を利用するか、無料版の Code-Llama を利用するかを聞かれる。</description></item><item><title>第一四半期の目標</title><link>https://sasakino.github.io/post/2023-01-06/</link><pubDate>Fri, 06 Jan 2023 10:19:21 +0900</pubDate><guid>https://sasakino.github.io/post/2023-01-06/</guid><description>4月までの目標を立てる。主なテーマは減量と英語学習。
 月 2 ~ 2.5 kg の減量 Evergreen を 1 周まわす いい加減にそろそろちゃんと痩せたい。
 脂肪 1 kg を減らすために必要なカロリーは 7200 kcal らしい。 1 ヶ月に脂肪を 2.5 kg 減らすには 600 kcal/日 消費する必要がある。 単純に考えると、600 kcal/日 だけ摂取カロリーが消費カロリーを下回ればいいということだろうか。
 日本医師会のこのページを参考にすると、今の自分の推定エネルギー必要量は 2295 Kcal/日なので、1700 kcal/日を目安にカロリー摂取をしてみる。
